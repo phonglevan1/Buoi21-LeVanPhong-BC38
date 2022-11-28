@@ -36,7 +36,6 @@ function validate(evt) {
 var employeeList = [];
 function createEmployee() {
     //1. DOM lấy input
-    var id = "item" + (new Date()).getMilliseconds() + Math.floor(Math.random() * 1000);
     var user = document.getElementById("tknv").value;
     var fullName = document.getElementById("name").value;
     var email = document.getElementById("email").value;
@@ -47,7 +46,6 @@ function createEmployee() {
     var timeWork = +document.getElementById("gioLam").value;
     //2. tạo đối tượng nhân viên
     var employee = new Employee(
-        id,
         user,
         fullName,
         email,
@@ -57,43 +55,20 @@ function createEmployee() {
         position,
         timeWork
     );
-    checkUser();
-    //4. thêm đối tượng sinh viên vào đối tượng
-    employeeList.push(employee);
-    checkName();
-    checkEmail();
-    checkPassWork();
-    checkSalary();
-    checkTimeWork();
-    renderEmployee();
-    saveEmployee();
-    console.log(pass);
-}
-// kiểm tra trùng tài khoản
-// function checkUser(){
-
-// }
-// kiểm tra ô tài khoản chỉ nhập vào 4 đến 6 ký tự và không để trống
-function checkUser() {
+    //check tài khoản
     var length = document.getElementById("tknv").value.length;
-    if (length <= 4 || length >= 6 || length === 0) {
-        document.getElementById("tbTKNV").innerHTML = "Tài khoản 4 đến 6 ký tự";
-        document.getElementById("tbTKNV").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbTKNV").style.display = "none";
-    }
     for (var i = 0; i < employeeList.length; i++) {
-        if (employeeList[i].user === document.getElementById("tknv").value) {
-            document.getElementById("tbTKNV").innerHTML = "Tài khoản đã sử dụng";
+        if (employeeList[i].user === user || length < 4 || length > 6) {
+            document.getElementById("tbTKNV").innerHTML = "tài khoản trùng hoặc sai(tài khoản 4 đến 6 ký tự)";
             document.getElementById("tbTKNV").style.display = "inline";
             return;
         }
+        else {
+            document.getElementById("tbTKNV").style.display = "none";
+        }
+
     }
-}
-// kiểm tra ô nhập họ tên không dược bỏ trống
-function checkName() {
+    // kiểm tra ô nhập họ tên không dược bỏ trống
     var checkName = document.getElementById("name").value.length;
     if (checkName === 0) {
         document.getElementById("tbTen").innerHTML = "Họ tên không được bỏ trống";
@@ -103,44 +78,47 @@ function checkName() {
     else {
         document.getElementById("tbTen").style.display = "none";
     }
-}
-// kiểm tra email
-function checkEmail() {
-    // /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+    //check email
     var reg = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-    if (!reg.test(email.value)) {
+    if (!reg.test(document.getElementById("email").value)) {
         document.getElementById("tbEmail").innerHTML = "Nhập email không đúng";
         document.getElementById("tbEmail").style.display = "inline";
+        return false;
     }
     else {
         document.getElementById("tbEmail").style.display = "none";
     }
-}
-// kiểm tra mật khẩu
-function checkPassWork() {
+    //check passWork
     var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
     if (!reg.test(document.getElementById("password").value)) {
         document.getElementById("tbMatKhau").innerHTML = "mật Khẩu từ 6-10 ký tự (chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt)";
         document.getElementById("tbMatKhau").style.display = "inline";
+        return;
     }
     else {
         document.getElementById("tbMatKhau").style.display = "none";
     }
-}
-// kiểm tra lương
-function checkSalary() {
+    //check Salary
     var wage = 0;
     wage = +document.getElementById("luongCB").value;
     if (wage < 1000000 || wage > 20000000) {
         document.getElementById("tbLuongCB").innerHTML = "Lương cơ bản từ 1 triệu đến 20 triệu";
         document.getElementById("tbLuongCB").style.display = "inline";
+        return;
     }
     else {
         document.getElementById("tbLuongCB").style.display = "none";
     }
-}
-// kiểm tra giờ làm việc
-function checkTimeWork() {
+    // kiểm tra chức vụ
+    if(position === "Chọn chức vụ"){
+        document.getElementById("tbChucVu").innerHTML = "Chọn chức vụ";
+        document.getElementById("tbChucVu").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbChucVu").style.display = "none";
+    }
+    // kiểm tra giờ làm việc
     var timeWork = +document.getElementById("gioLam").value;
     if (timeWork < 80 || timeWork > 200) {
         document.getElementById("tbGiolam").innerHTML = "Số giờ làm trong tháng 80 - 200 giờ";
@@ -150,7 +128,12 @@ function checkTimeWork() {
     else {
         document.getElementById("tbGiolam").style.display = "none";
     }
+
+    employeeList.push(employee);
+    renderEmployee();
+    saveEmployee();
 }
+
 // in danh sách ra màn hình
 function renderEmployee() {
     var html = "";
@@ -163,6 +146,14 @@ function renderEmployee() {
             <td>${employeeList[i].position}</td>
             <td>${employeeList[i].salary()}</td>
             <td>${employeeList[i].classIfication()}</td>
+            <td>
+                <button
+                    onclick="deleteEmployee('${employeeList[i].user}')"
+                    class = "btn btn-danger">Xóa</button>
+                    <button 
+                    onclick="getUpdateStudent('${employeeList[i].user}')"
+                    class = "btn btn-info">Sửa</button>
+            </td>
         </tr>`
     }
     document.getElementById("tableDanhSach").innerHTML = html;
@@ -182,7 +173,6 @@ function mapEmployeeList(local) {
     for (var i = 0; i < local.length; i++) {
         var oldEmployee = local[i];
         var newEmployee = new Employee(
-            oldEmployee.employeeId,
             oldEmployee.user,
             oldEmployee.fullName,
             oldEmployee.email,
@@ -195,6 +185,26 @@ function mapEmployeeList(local) {
         result.push(newEmployee);
     }
     return result;
+}
+function findByUser(user) {
+    for (var i = 0; i < employeeList.length; i++) {
+        if (employeeList[i].user === user) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+//xóa
+function deleteEmployee(user) {
+    var index = findByUser(user);
+    if (index === -1) return alert("user không tìm thấy");
+
+    employeeList.splice(index, 1);
+
+    renderEmployee();
+
+    saveEmployee();
 }
 // lưu danh sách nhân viên vào local
 function saveEmployee() {
