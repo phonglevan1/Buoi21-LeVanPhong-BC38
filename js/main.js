@@ -15,25 +15,9 @@ function validate(evt) {
         if (theEvent.preventDefault) theEvent.preventDefault();
     }
 }
-//không được nhập số
-// function validate2(evt) {
-//     var theEvent = evt || window.event;
-//     // Handle paste
-//     if (theEvent.type === 'paste') {
-//         key = event.clipboardData.getData('text/plain');
-//     } else {
-//         // Handle key press
-//         var key = theEvent.keyCode || theEvent.which;
-//         key = String.fromCharCode(key);
-//     }
-//     var regex = /[a-z]/;
-//     if (!regex.test(key)) {
-//         theEvent.returnValue = false;
-//         if (theEvent.preventDefault) theEvent.preventDefault();
-//     }
-// }
 var employeeList = [];
 function createEmployee() {
+    //kiểm tra trược khi thêm
     //1. DOM lấy input
     var user = document.getElementById("tknv").value;
     var fullName = document.getElementById("name").value;
@@ -54,7 +38,6 @@ function createEmployee() {
         position,
         timeWork
     );
-    //check tài khoản
     var length = document.getElementById("tknv").value.length;
     for (var i = 0; i < employeeList.length; i++) {
         if (employeeList[i].user === user || length < 4 || length > 6) {
@@ -67,72 +50,11 @@ function createEmployee() {
         }
 
     }
-    // kiểm tra ô nhập họ tên không dược bỏ trống
-    var checkName = document.getElementById("name").value.length;
-    if (checkName === 0) {
-        document.getElementById("tbTen").innerHTML = "Họ tên không được bỏ trống";
-        document.getElementById("tbTen").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbTen").style.display = "none";
-    }
-    //check email
-    var reg = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-    if (!reg.test(document.getElementById("email").value)) {
-        document.getElementById("tbEmail").innerHTML = "Nhập email không đúng";
-        document.getElementById("tbEmail").style.display = "inline";
-        return false;
-    }
-    else {
-        document.getElementById("tbEmail").style.display = "none";
-    }
-    //check passWork
-    var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
-    if (!reg.test(document.getElementById("password").value)) {
-        document.getElementById("tbMatKhau").innerHTML = "mật Khẩu từ 6-10 ký tự (chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt)";
-        document.getElementById("tbMatKhau").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbMatKhau").style.display = "none";
-    }
-
-    //check Salary
-    var wage = 0;
-    wage = +document.getElementById("luongCB").value;
-    if (wage < 1000000 || wage > 20000000) {
-        document.getElementById("tbLuongCB").innerHTML = "Lương cơ bản từ 1 triệu đến 20 triệu";
-        document.getElementById("tbLuongCB").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbLuongCB").style.display = "none";
-    }
-    // kiểm tra chức vụ
-    if (position === "Chọn chức vụ") {
-        document.getElementById("tbChucVu").innerHTML = "Chọn chức vụ";
-        document.getElementById("tbChucVu").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbChucVu").style.display = "none";
-    }
-    // kiểm tra giờ làm việc
-    var timeWork = +document.getElementById("gioLam").value;
-    if (timeWork < 80 || timeWork > 200) {
-        document.getElementById("tbGiolam").innerHTML = "Số giờ làm trong tháng 80 - 200 giờ";
-        document.getElementById("tbGiolam").style.display = "inline";
-        return;
-    }
-    else {
-        document.getElementById("tbGiolam").style.display = "none";
-    }
-
+    if (!validateForm()) return;
     employeeList.push(employee);
     renderEmployee();
     saveEmployee();
-    // xóa form
+    //xóa form
     dellForm();
     Swal.fire({
         position: 'top-end',
@@ -140,14 +62,12 @@ function createEmployee() {
         title: 'thêm Thành Công',
         showConfirmButton: false,
         timer: 1500
-      })
+    })
 }
 
 // in danh sách ra màn hình
 function renderEmployee(data) {
-    if(!data){
-        data = employeeList;
-    }
+    data = data || employeeList;
     var html = "";
     for (var i = 0; i < data.length; i++) {
         html += `<tr>
@@ -219,26 +139,26 @@ function deleteEmployee(user) {
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         confirmButtonText: 'Yes, delete it!'
-      }).then((result) => {
+    }).then((result) => {
         if (result.isConfirmed) {
             var index = findByUser(user);
             if (index === -1) return alert("user không tìm thấy");
-        
+
             employeeList.splice(index, 1);
-        
+
             renderEmployee();
-        
+
             saveEmployee();
         }
-      })
-      .catch(function (err) {
-        console.log(err);
-        Swal.fire({
-            title:"Error!",
-            timer:2000,
-            icon:"error",
-        });
     })
+        .catch(function (err) {
+            console.log(err);
+            Swal.fire({
+                title: "Error!",
+                timer: 2000,
+                icon: "error",
+            });
+        })
 }
 // chọn nhân viên muons cập nhật và in ra màn hình
 function getUpdateEmployee(user) {
@@ -259,6 +179,7 @@ function getUpdateEmployee(user) {
     document.getElementById("tknv").disabled = true;
 }
 function updateEmployee() {
+    validateForm();
     //1. DOM lấy input
     var user = document.getElementById("tknv").value;
     var fullName = document.getElementById("name").value;
@@ -280,6 +201,7 @@ function updateEmployee() {
     employee.basicSalary = basicSalary;
     employee.position = position;
     employee.timeWork = timeWork;
+    if (!validateForm()) return;
 
     renderEmployee();
 
@@ -292,14 +214,14 @@ function updateEmployee() {
         title: 'Sửa Thành Công',
         showConfirmButton: false,
         timer: 1500
-      })
+    })
 }
 
-function searchEmpoyee(e){
+function searchEmpoyee(e) {
     var keyWord = document.getElementById("searchName").value.toLowerCase().trim();
     var result = [];
-    for(var i = 0; i < employeeList.length; i ++){
-        if(employeeList[i].classIfication().toLowerCase().includes(keyWord)){
+    for (var i = 0; i < employeeList.length; i++) {
+        if (employeeList[i].classIfication().toLowerCase().includes(keyWord)) {
             result.push(employeeList[i]);
         }
     }
@@ -311,6 +233,14 @@ function dellForm() {
     document.getElementById("myform").reset();
 
     document.getElementById("tknv").disabled = false;
+
+    document.getElementById("tbEmail").style.display = "none";
+    document.getElementById("tbTKNV").style.display = "none";
+    document.getElementById("tbTen").style.display = "none";
+    document.getElementById("tbMatKhau").style.display = "none";
+    document.getElementById("tbLuongCB").style.display = "none";
+    document.getElementById("tbChucVu").style.display = "none";
+    document.getElementById("tbGiolam").style.display = "none";
 }
 
 // lưu danh sách nhân viên vào local
@@ -325,3 +255,74 @@ window.onload = function () {
     employeeList = mapEmployeeList(employeeFromLocal);
     renderEmployee();
 }
+
+//-----VALIDATION-------
+function validateForm() {
+    var position = document.getElementById("chucvu").value;
+    //check tài khoản
+
+    // kiểm tra ô nhập họ tên không dược bỏ trống
+    var checkName = document.getElementById("name").value.length;
+    if (checkName === 0) {
+        document.getElementById("tbTen").innerHTML = "Họ tên không được bỏ trống";
+        document.getElementById("tbTen").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbTen").style.display = "none";
+    }
+    //check email
+    var reg = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+    if (!reg.test(document.getElementById("email").value)) {
+        document.getElementById("tbEmail").innerHTML = "Nhập email không đúng";
+        document.getElementById("tbEmail").style.display = "inline";
+        return false;
+    }
+    else {
+        document.getElementById("tbEmail").style.display = "none";
+    }
+    //check passWork
+    var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
+    if (!reg.test(document.getElementById("password").value)) {
+        document.getElementById("tbMatKhau").innerHTML = "mật Khẩu từ 6-10 ký tự (chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt)";
+        document.getElementById("tbMatKhau").style.display = "inline";
+        return false;
+    }
+    else {
+        document.getElementById("tbMatKhau").style.display = "none";
+        return true;
+    }
+
+    //check Salary
+    var wage = 0;
+    wage = +document.getElementById("luongCB").value;
+    if (wage < 1000000 || wage > 20000000) {
+        document.getElementById("tbLuongCB").innerHTML = "Lương cơ bản từ 1 triệu đến 20 triệu";
+        document.getElementById("tbLuongCB").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbLuongCB").style.display = "none";
+    }
+    // kiểm tra chức vụ
+    if (position === "Chọn chức vụ") {
+        document.getElementById("tbChucVu").innerHTML = "Chọn chức vụ";
+        document.getElementById("tbChucVu").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbChucVu").style.display = "none";
+    }
+    // kiểm tra giờ làm việc
+    var timeWork = +document.getElementById("gioLam").value;
+    if (timeWork < 80 || timeWork > 200) {
+        document.getElementById("tbGiolam").innerHTML = "Số giờ làm trong tháng 80 - 200 giờ";
+        document.getElementById("tbGiolam").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbGiolam").style.display = "none";
+    }
+    return -1;
+}
+
