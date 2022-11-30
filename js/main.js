@@ -32,7 +32,6 @@ function validate(evt) {
 //         if (theEvent.preventDefault) theEvent.preventDefault();
 //     }
 // }
-
 var employeeList = [];
 function createEmployee() {
     //1. DOM lấy input
@@ -41,7 +40,7 @@ function createEmployee() {
     var email = document.getElementById("email").value;
     var pass = document.getElementById("password").value;
     var dateWork = document.getElementById("datepicker").value;
-    var salary = +document.getElementById("luongCB").value;
+    var basicSalary = +document.getElementById("luongCB").value;
     var position = document.getElementById("chucvu").value;
     var timeWork = +document.getElementById("gioLam").value;
     //2. tạo đối tượng nhân viên
@@ -51,7 +50,7 @@ function createEmployee() {
         email,
         pass,
         dateWork,
-        salary,
+        basicSalary,
         position,
         timeWork
     );
@@ -59,7 +58,7 @@ function createEmployee() {
     var length = document.getElementById("tknv").value.length;
     for (var i = 0; i < employeeList.length; i++) {
         if (employeeList[i].user === user || length < 4 || length > 6) {
-            document.getElementById("tbTKNV").innerHTML = "tài khoản trùng hoặc sai(tài khoản 4 đến 6 ký tự)";
+            document.getElementById("tbTKNV").innerHTML = "tài khoản trùng hoặc sai(tài khoản 4 đến 6 ký số)";
             document.getElementById("tbTKNV").style.display = "inline";
             return;
         }
@@ -98,6 +97,7 @@ function createEmployee() {
     else {
         document.getElementById("tbMatKhau").style.display = "none";
     }
+
     //check Salary
     var wage = 0;
     wage = +document.getElementById("luongCB").value;
@@ -110,7 +110,7 @@ function createEmployee() {
         document.getElementById("tbLuongCB").style.display = "none";
     }
     // kiểm tra chức vụ
-    if(position === "Chọn chức vụ"){
+    if (position === "Chọn chức vụ") {
         document.getElementById("tbChucVu").innerHTML = "Chọn chức vụ";
         document.getElementById("tbChucVu").style.display = "inline";
         return;
@@ -132,26 +132,40 @@ function createEmployee() {
     employeeList.push(employee);
     renderEmployee();
     saveEmployee();
+    // xóa form
+    dellForm();
+    Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'thêm Thành Công',
+        showConfirmButton: false,
+        timer: 1500
+      })
 }
 
 // in danh sách ra màn hình
-function renderEmployee() {
+function renderEmployee(data) {
+    if(!data){
+        data = employeeList;
+    }
     var html = "";
-    for (var i = 0; i < employeeList.length; i++) {
+    for (var i = 0; i < data.length; i++) {
         html += `<tr>
-            <td>${employeeList[i].user}</td>
-            <td>${employeeList[i].fullName}</td>
-            <td>${employeeList[i].email}</td>
-            <td>${employeeList[i].dateWork}</td>
-            <td>${employeeList[i].position}</td>
-            <td>${employeeList[i].salary()}</td>
-            <td>${employeeList[i].classIfication()}</td>
+            <td>${data[i].user}</td>
+            <td>${data[i].fullName}</td>
+            <td>${data[i].email}</td>
+            <td>${data[i].dateWork}</td>
+            <td>${data[i].position}</td>
+            <td>${data[i].salary()}</td>
+            <td>${data[i].classIfication()}</td>
             <td>
                 <button
                     onclick="deleteEmployee('${employeeList[i].user}')"
                     class = "btn btn-danger">Xóa</button>
                     <button 
-                    onclick="getUpdateStudent('${employeeList[i].user}')"
+                    data-toggle="modal"
+                    data-target="#myModal"
+                    onclick="getUpdateEmployee('${employeeList[i].user}')"
                     class = "btn btn-info">Sửa</button>
             </td>
         </tr>`
@@ -197,15 +211,108 @@ function findByUser(user) {
 
 //xóa
 function deleteEmployee(user) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, delete it!'
+      }).then((result) => {
+        if (result.isConfirmed) {
+            var index = findByUser(user);
+            if (index === -1) return alert("user không tìm thấy");
+        
+            employeeList.splice(index, 1);
+        
+            renderEmployee();
+        
+            saveEmployee();
+        }
+      })
+      .catch(function (err) {
+        console.log(err);
+        Swal.fire({
+            title:"Error!",
+            timer:2000,
+            icon:"error",
+        });
+    })
+}
+// chọn nhân viên muons cập nhật và in ra màn hình
+function getUpdateEmployee(user) {
     var index = findByUser(user);
-    if (index === -1) return alert("user không tìm thấy");
 
-    employeeList.splice(index, 1);
+    if (index === -1) return alert("User không tìm thấy");
+
+    var employee = employeeList[index];
+    document.getElementById("tknv").value = employee.user;
+    document.getElementById("name").value = employee.fullName;
+    document.getElementById("email").value = employee.email;
+    document.getElementById("password").value = employee.pass;
+    document.getElementById("datepicker").value = employee.dateWork;
+    document.getElementById("luongCB").value = employee.basicSalary;
+    document.getElementById("chucvu").value = employee.position;
+    document.getElementById("gioLam").value = employee.timeWork;
+
+    document.getElementById("tknv").disabled = true;
+}
+function updateEmployee() {
+    //1. DOM lấy input
+    var user = document.getElementById("tknv").value;
+    var fullName = document.getElementById("name").value;
+    var email = document.getElementById("email").value;
+    var pass = document.getElementById("password").value;
+    var dateWork = document.getElementById("datepicker").value;
+    var basicSalary = +document.getElementById("luongCB").value;
+    var position = document.getElementById("chucvu").value;
+    var timeWork = +document.getElementById("gioLam").value;
+
+    var index = findByUser(user);
+
+    var employee = employeeList[index];
+
+    employee.fullName = fullName;
+    employee.email = email;
+    employee.pass = pass;
+    employee.dateWork = dateWork;
+    employee.basicSalary = basicSalary;
+    employee.position = position;
+    employee.timeWork = timeWork;
 
     renderEmployee();
 
     saveEmployee();
+
+    dellForm();
+    Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Sửa Thành Công',
+        showConfirmButton: false,
+        timer: 1500
+      })
 }
+
+function searchEmpoyee(e){
+    var keyWord = document.getElementById("searchName").value.toLowerCase().trim();
+    var result = [];
+    for(var i = 0; i < employeeList.length; i ++){
+        if(employeeList[i].classIfication().toLowerCase().includes(keyWord)){
+            result.push(employeeList[i]);
+        }
+    }
+    renderEmployee(result);
+}
+
+function dellForm() {
+    // xóa form
+    document.getElementById("myform").reset();
+
+    document.getElementById("tknv").disabled = false;
+}
+
 // lưu danh sách nhân viên vào local
 function saveEmployee() {
     // chuyển danh sách nhân viên thành JSON
