@@ -15,6 +15,7 @@ function validate(evt) {
         if (theEvent.preventDefault) theEvent.preventDefault();
     }
 }
+
 var employeeList = [];
 function createEmployee() {
     //kiểm tra trược khi thêm
@@ -39,6 +40,7 @@ function createEmployee() {
         timeWork
     );
     var length = document.getElementById("tknv").value.length;
+    
     for (var i = 0; i < employeeList.length; i++) {
         if (employeeList[i].user === user || length < 4 || length > 6) {
             document.getElementById("tbTKNV").innerHTML = "tài khoản trùng hoặc sai(tài khoản 4 đến 6 ký số)";
@@ -264,36 +266,73 @@ function validateForm() {
     // kiểm tra ô nhập họ tên không dược bỏ trống
     var checkName = document.getElementById("name").value.length;
     if (checkName === 0) {
-        document.getElementById("tbTen").innerHTML = "Họ tên không được bỏ trống";
+        document.getElementById("tbTen").innerHTML = "không được bỏ trống";
         document.getElementById("tbTen").style.display = "inline";
         return;
+    }
+    var reg = /^([a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ\s]+)$/i;
+    if (!reg.test(document.getElementById("name").value)) {
+        document.getElementById("tbTen").innerHTML = "Nhâp tên không đúng";
+        document.getElementById("tbTen").style.display = "inline";
     }
     else {
         document.getElementById("tbTen").style.display = "none";
     }
+
     //check email
+    var checkEmail = document.getElementById("email").value.length;
+    if (checkEmail === 0) {
+        document.getElementById("tbEmail").innerHTML = "không được bỏ trống";
+        document.getElementById("tbEmail").style.display = "inline";
+        return;
+    }
     var reg = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
     if (!reg.test(document.getElementById("email").value)) {
         document.getElementById("tbEmail").innerHTML = "Nhập email không đúng";
         document.getElementById("tbEmail").style.display = "inline";
-        return false;
     }
     else {
         document.getElementById("tbEmail").style.display = "none";
     }
     //check passWork
+    var checkPass = document.getElementById("password").value.length;
+    if (checkPass === 0) {
+        document.getElementById("tbMatKhau").innerHTML = "không được bỏ trống";
+        document.getElementById("tbMatKhau").style.display = "inline";
+        return;
+    }
     var reg = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,10}$/;
     if (!reg.test(document.getElementById("password").value)) {
         document.getElementById("tbMatKhau").innerHTML = "mật Khẩu từ 6-10 ký tự (chứa ít nhất 1 ký tự số, 1 ký tự in hoa, 1 ký tự đặc biệt)";
         document.getElementById("tbMatKhau").style.display = "inline";
-        return false;
+        return;
     }
     else {
         document.getElementById("tbMatKhau").style.display = "none";
-        return true;
     }
-
+    // check date
+    var checkDate = document.getElementById("datepicker").value.length;
+    if (checkDate === 0) {
+        document.getElementById("tbNgay").innerHTML = "không được bỏ trống";
+        document.getElementById("tbNgay").style.display = "inline";
+        return;
+    }
+    var reg = /^(0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{4}$/;
+    if (!reg.test(document.getElementById("datepicker").value)) {
+        document.getElementById("tbNgay").innerHTML = "ngày không hợp lệ(định dạng mm/dd/yyyy)";
+        document.getElementById("tbNgay").style.display = "inline";
+        return;
+    }
+    else {
+        document.getElementById("tbNgay").style.display = "none";
+    }
     //check Salary
+    var checkSalary = document.getElementById("luongCB").value.length;
+    if (checkSalary === 0) {
+        document.getElementById("tbLuongCB").innerHTML = "không được bỏ trống";
+        document.getElementById("tbLuongCB").style.display = "inline";
+        return;
+    }
     var wage = 0;
     wage = +document.getElementById("luongCB").value;
     if (wage < 1000000 || wage > 20000000) {
@@ -314,6 +353,12 @@ function validateForm() {
         document.getElementById("tbChucVu").style.display = "none";
     }
     // kiểm tra giờ làm việc
+    var checkSalary = document.getElementById("gioLam").value.length;
+    if (checkSalary === 0) {
+        document.getElementById("tbGiolam").innerHTML = "không được bỏ trống";
+        document.getElementById("tbGiolam").style.display = "inline";
+        return;
+    }
     var timeWork = +document.getElementById("gioLam").value;
     if (timeWork < 80 || timeWork > 200) {
         document.getElementById("tbGiolam").innerHTML = "Số giờ làm trong tháng 80 - 200 giờ";
